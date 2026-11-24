@@ -97,6 +97,8 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
             rgb = image(probe["image"])
             images.append([Image.new("RGB", rgb.size, (128, 128, 128)) if arm == "blank_W0" else rgb])
         inputs = processor(text=prompts, images=images, padding=True, return_tensors="pt")
+        if inputs["pixel_values"].shape[1] != 1 or max(inputs["pixel_values"].shape[-2:]) > config["image_max_edge"]:
+            raise ValueError("The processor must provide one image tile per example at the configured resolution")
         inputs = {key: (value.to(device=device, dtype=dtype) if value.is_floating_point() else value.to(device))
                   for key, value in inputs.items()}
         with torch.inference_mode():
@@ -113,6 +115,8 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
             processor = AutoProcessor.from_pretrained(model_id, revision=revision, use_fast=False,
                                                       local_files_only=offline, token=False)
             processor.tokenizer.padding_side = "left"
+            processor.image_processor.size = {"longest_edge": config["image_max_edge"]}
+            processor.image_processor.do_image_splitting = config["image_splitting"]
             model = AutoModelForImageTextToText.from_pretrained(
                 model_id, revision=revision, torch_dtype=dtype, attn_implementation="sdpa",
                 local_files_only=offline, token=False,

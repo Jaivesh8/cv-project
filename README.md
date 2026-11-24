@@ -8,6 +8,8 @@ The fixed main set contains 500 object-existence probes on 250 distinct [COCO va
 
 The sampler joins [official POPE](https://github.com/RUCAIBox/POPE) and [RePOPE](https://github.com/YanNeu/RePOPE) by split and question ID and verifies the image and question match. RePOPE excludes ambiguous cases before sampling. The main analysis uses corrected labels and records a matched rescoring with original labels. `protocol.json` pins all revisions, the sampling seed (53244), the bootstrap seed (53245), and the full prompt templates. The log records hashes of the annotations, probe manifest, and image set.
 
+All checkpoints receive a single image per probe with the longest edge capped at 512 pixels. Tiling is disabled and the runner checks the processor output size before generation.
+
 | Name in tables | Open checkpoint |
 |---|---|
 | smol256 | [SmolVLM-256M-Instruct](https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct) |
