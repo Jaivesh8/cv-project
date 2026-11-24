@@ -1,0 +1,37 @@
+model,type,probe_id,target,label,W0,W1,W2,blank_W0
+smol256,false_yes,adversarial:1350,dining table,no,yes,yes,no,no
+smol256,false_yes,adversarial:1522,dining table,no,yes,no,no,no
+smol256,false_yes,adversarial:306,person,no,yes,no,no,no
+smol256,false_yes,adversarial:534,chair,no,yes,yes,no,no
+smol256,false_no,random:595,backpack,yes,no,no,no,no
+smol256,false_no,random:355,person,yes,no,no,no,no
+smol256,false_no,random:2253,bowl,yes,no,no,no,no
+smol256,false_no,random:883,motorcycle,yes,no,no,no,no
+smol256,wording_flip,random:921,carrot,yes,yes,yes,no,no
+smol256,wording_flip,adversarial:1350,dining table,no,yes,yes,no,no
+smol256,wording_flip,random:2743,vase,yes,yes,yes,no,no
+smol256,wording_flip,random:643,person,yes,yes,no,no,no
+smol500,false_yes,popular:2244,chair,no,yes,no,no,no
+smol500,false_yes,adversarial:1522,dining table,no,yes,yes,yes,no
+smol500,false_yes,adversarial:306,person,no,yes,yes,no,yes
+smol500,false_yes,popular:1658,person,no,yes,no,no,yes
+smol500,false_no,random:595,backpack,yes,no,no,no,no
+smol500,false_no,random:355,person,yes,no,no,no,yes
+smol500,false_no,random:497,handbag,yes,no,no,no,no
+smol500,false_no,random:883,motorcycle,yes,no,no,no,no
+smol500,wording_flip,popular:2244,chair,no,yes,no,no,no
+smol500,wording_flip,adversarial:306,person,no,yes,yes,no,yes
+smol500,wording_flip,popular:1658,person,no,yes,no,no,yes
+smol500,wording_flip,random:1639,baseball glove,yes,yes,yes,no,no
+smol2video,false_yes,random:424,book,no,yes,no,no,no
+smol2video,false_yes,adversarial:1350,dining table,no,yes,no,no,no
+smol2video,false_yes,popular:2244,chair,no,yes,yes,no,no
+smol2video,false_yes,adversarial:2526,bottle,no,yes,yes,no,no
+smol2video,false_no,random:1949,car,yes,no,yes,no,no
+smol2video,false_no,random:2363,dining table,yes,no,no,no,no
+smol2video,false_no,random:883,motorcycle,yes,no,no,no,no
+smol2video,false_no,random:1929,car,yes,no,no,no,no
+smol2video,wording_flip,random:921,carrot,yes,yes,yes,no,no
+smol2video,wording_flip,random:424,book,no,yes,no,no,no
+smol2video,wording_flip,adversarial:1350,dining table,no,yes,no,no,no
+smol2video,wording_flip,random:2743,vase,yes,yes,yes,no,no

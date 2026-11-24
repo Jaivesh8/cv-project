@@ -1,0 +1,13 @@
+model,arm,responses,seconds
+smol256,W0,500,237.222
+smol256,W1,500,83.655
+smol256,W2,500,85.471
+smol256,blank_W0,500,130.691
+smol500,W0,500,314.653
+smol500,W1,500,172.422
+smol500,W2,500,191.933
+smol500,blank_W0,500,218.313
+smol2video,W0,500,333.164
+smol2video,W1,500,175.182
+smol2video,W2,500,174.58
+smol2video,blank_W0,500,221.277

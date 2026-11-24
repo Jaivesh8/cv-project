@@ -113,6 +113,8 @@ def analyze(config, probes, out):
                 old = metrics(old_truth == "yes", answer, point_idx)
                 rescoring.append(dict(model=model, arm=arm, n=len(probes),
                                       relabeled=int((old_truth != truth).sum()),
+                                      original_yes_to_no=int(((old_truth == "yes") & (truth == "no")).sum()),
+                                      original_no_to_yes=int(((old_truth == "no") & (truth == "yes")).sum()),
                                       original_f1=round(float(old["f1"]), 3),
                                       corrected_f1=row["f1"],
                                       original_false_yes=round(float(old["false_yes"]), 3),
@@ -172,7 +174,8 @@ def analyze(config, probes, out):
             for i in np.flatnonzero(mask)[:config["gallery_per_type"]]:
                 p = probes[i]
                 cases.append(dict(model=model, type=kind, probe_id=p["probe_id"],
-                                  label=p["label"], **{arm: answers[arm][i] for arm in arms}))
+                                  target=p["target"], label=p["label"],
+                                  **{arm: answers[arm][i] for arm in arms}))
         for arm in arms:
             values = [predictions[model, p["probe_id"], arm]["seconds"] for p in probes]
             timing.append(dict(model=model, arm=arm, responses=len(values), seconds=round(sum(values), 3)))

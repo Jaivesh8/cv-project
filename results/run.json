@@ -1,0 +1,39 @@
+{
+  "seed": 53244,
+  "bootstrap_seed": 53245,
+  "pilot": false,
+  "n_probes": 500,
+  "n_images": 250,
+  "protocol_sha256": "542fa3eb39e97d472f2979fe0c3317bee94381fa76a94301af31ee39561c7447",
+  "manifest_sha256": "b14c43cd31dfd5253655d7807a91275dd796a9d15d8f51fd7e8bf6b837e08d1c",
+  "annotation_sha256": {
+    "pope_random": "ac25245170b975a5bdf9080b23fd431dfe6be458bc038259c1f4f09a6bef7994",
+    "repope_random": "f464fcaf60b24ce2f280cf33f122e000dbdd35c8e88f77c4141c9c2cba864611",
+    "pope_popular": "72c1a8ad45d0c13514f5f22598261df41d3b533854d29682e924db50ed8aa753",
+    "repope_popular": "57832b055bae5fd6176278a4f104c98ddd84811f7d26dfcb93d481f6c9da09a5",
+    "pope_adversarial": "420b3407db1fa9f1187a805dca41cb7b97fd91504e6c2179706188c107fb8ef8",
+    "repope_adversarial": "8c346dbb060bf422ff92e769fa68e5ab3e8a777cb28a26e973387441e05c9ccf"
+  },
+  "models": {
+    "smol256": [
+      "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "d039ab0d4b9311b617e8ffec1d06c8464364aeb3"
+    ],
+    "smol500": [
+      "HuggingFaceTB/SmolVLM-500M-Instruct",
+      "753c1752602b5e739af7a7fa6947a635051897a3"
+    ],
+    "smol2video": [
+      "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+      "4cde9d208e19519c36917aa170fffc7e381aa0ad"
+    ]
+  },
+  "torch": "2.7.1+cu118",
+  "transformers": "4.53.3",
+  "safetensors": "0.5.3",
+  "device": "cuda",
+  "hardware": "NVIDIA GeForce GTX 1650",
+  "system": "Windows-11-10.0.26200-SP0",
+  "dtype": "torch.float16",
+  "batch_size": 2
+}

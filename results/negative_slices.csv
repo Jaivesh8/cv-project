@@ -1,0 +1,10 @@
+model,split,n,false_yes_count,false_yes,false_yes_low,false_yes_high
+smol256,random,84,9,10.714,4.762,17.857
+smol256,popular,83,10,12.048,6.024,19.277
+smol256,adversarial,83,18,21.687,13.253,31.325
+smol500,random,84,5,5.952,1.19,11.905
+smol500,popular,83,10,12.048,6.024,19.277
+smol500,adversarial,83,13,15.663,8.434,24.096
+smol2video,random,84,20,23.81,15.446,33.333
+smol2video,popular,83,39,46.988,36.145,57.831
+smol2video,adversarial,83,39,46.988,36.145,57.831

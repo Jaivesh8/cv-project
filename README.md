@@ -42,7 +42,21 @@ For the offline viva, cache the separate pilot with `bash run_all.sh --pilot` wh
 
 ## Results
 
-See [main table](results/main.md) after the main run finishes. `predictions.jsonl` is the raw prediction log. The aggregate output includes wording transitions, negative strata, paired real-vs-gray ablation, rescoring under original annotations, timing, and gallery probe IDs. `audit/reporting.py` validates log completeness before computing results. No dataset images, weights, or environment cache belong in Git.
+The recorded run used **NVIDIA GeForce GTX 1650**, torch.float16, PyTorch 2.7.1+cu118, Transformers 4.53.3, and batch size 2. The 6,000 responses took **38.98 minutes** of inference batches, excluding downloads and checkpoint loading.
+
+| Model | Prompt | Precision | Recall | F1 | False yes | False no | Invalid |
+|---|---|---:|---:|---:|---:|---:|---:|
+| smol256 | W0 | 84.71% | 82.00% | 83.33% | 14.80% | 18.00% | 0.00% |
+| smol256 | W1 | 90.91% | 72.00% | 80.36% | 7.20% | 28.00% | 0.00% |
+| smol256 | W2 | 93.81% | 42.40% | 58.40% | 2.80% | 57.60% | 0.00% |
+| smol500 | W0 | 88.03% | 82.40% | 85.12% | 11.20% | 17.60% | 0.00% |
+| smol500 | W1 | 89.66% | 83.20% | 86.31% | 9.60% | 16.80% | 0.00% |
+| smol500 | W2 | 95.57% | 77.60% | 85.65% | 3.60% | 22.40% | 0.00% |
+| smol2video | W0 | 70.48% | 93.60% | 80.41% | 39.20% | 6.40% | 0.00% |
+| smol2video | W1 | 79.12% | 94.00% | 85.92% | 24.80% | 6.00% | 0.00% |
+| smol2video | W2 | 95.20% | 55.60% | 70.20% | 2.80% | 44.40% | 0.00% |
+
+The [prediction log](results/predictions.jsonl) contains the exact response text and parsed answer. [Run metadata](results/run.json) records the fixed seeds, revisions, hardware and input hashes. [Main metrics and intervals](results/main.csv), [paired wording transitions](results/wording.csv), [gray-image ablation](results/ablation_effects.csv), [negative strata](results/negative_slices.csv), [annotation rescoring](results/label_rescoring.csv), and [gallery case IDs](results/gallery_cases.csv) are generated from the same complete log. To render the visual gallery using locally cached COCO images, run `python -m audit.gallery`.
 
 ## Implementation and credits
 
