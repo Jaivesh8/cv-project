@@ -3,4 +3,5 @@ torchvision==0.22.1
 transformers==4.53.3
 huggingface-hub==0.33.5
 safetensors==0.5.3
+num2words==0.5.14
 -r requirements-replay.txt
