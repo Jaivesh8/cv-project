@@ -46,4 +46,4 @@ Relevant papers and how they position the extension are in [RELATED_WORK.md](REL
 
 ## AI declaration
 
-OpenAI Codex assisted with finding papers, designing the revised protocol, implementing and debugging the pipeline, running verification, and drafting submission material. Reported metrics must be generated from logged model outputs. Team members should verify this declaration and add any other tools they used before signing the submission.
+OpenAI Codex assisted with literature discovery, protocol and code development, experiment execution, and drafting submission materials. Reported metrics come from logged model outputs.

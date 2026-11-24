@@ -14,6 +14,7 @@ PROTOCOL_PATH = ROOT / "protocol.json"
 IMAGE_BASE = "https://s3.amazonaws.com/images.cocodataset.org/val2014"
 IMAGE_NAME = re.compile(r"COCO_val2014_\d{12}\.jpg\Z")
 OBJECT_QUESTION = re.compile(r"Is there (?:an? )?(.+?) in the image\?\Z")
+PLURAL_TARGETS = {"scissors", "skis"}
 
 
 def digest(path):
@@ -114,11 +115,14 @@ def download_images(probes):
 
 
 def noun_phrase(target):
-    if target in {"broccoli", "scissors", "skis"}:
+    if target == "broccoli" or target in PLURAL_TARGETS:
         return f"any {target}"
     article = "an" if target[0] in "aeiou" else "a"
     return f"{article} {target}"
 
 
 def format_prompt(config, template, target):
-    return config["templates"][template].format(target=noun_phrase(target)) + " " + config["answer_instruction"]
+    question = config["templates"][template].format(target=noun_phrase(target))
+    if template == "W0" and target in PLURAL_TARGETS:
+        question = question.replace("Is there ", "Are there ", 1)
+    return question + " " + config["answer_instruction"]
