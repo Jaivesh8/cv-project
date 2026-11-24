@@ -6,6 +6,7 @@ import re
 import time
 from functools import lru_cache
 
+from .checkpoints import load_checkpoint
 from .data import CACHE, digest, download_images, format_prompt
 
 
@@ -28,12 +29,13 @@ def load_predictions(path):
     return rows
 
 
-def run(config, probes, metadata, out, device_name, batch_size, offline):
+def run(config, probes, metadata, out, device_name, batch_size, offline, model_name=None):
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+    import safetensors
     import torch
     import transformers
     from PIL import Image, ImageOps
-    from transformers import AutoModelForImageTextToText, AutoProcessor
+    from transformers import AutoProcessor
 
     device = "cuda" if device_name == "auto" and torch.cuda.is_available() else device_name
     if device == "auto":
@@ -50,6 +52,7 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
         **metadata,
         "torch": torch.__version__,
         "transformers": transformers.__version__,
+        "safetensors": safetensors.__version__,
         "device": device,
         "hardware": torch.cuda.get_device_name() if device == "cuda" else platform.processor(),
         "system": platform.platform(),
@@ -64,7 +67,8 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
     log = out / "predictions.jsonl"
     existing = load_predictions(log)
     work = [(probe, arm) for arm in (*config["templates"], "blank_W0") for probe in probes]
-    expected = [(model, p["probe_id"], arm) for model in config["models"] for p, arm in work]
+    model_names = [model_name] if model_name else list(config["models"])
+    expected = [(model, p["probe_id"], arm) for model in model_names for p, arm in work]
     if all(key in existing for key in expected):
         print("All model predictions already exist.", flush=True)
         return
@@ -87,28 +91,44 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
             rgb.thumbnail((config["image_max_edge"],) * 2, Image.Resampling.LANCZOS)
         return rgb
 
-    def predict(batch, model, processor):
+    def predict(batch, model, processor, feature_cache):
         prompts, images = [], []
+        visual_keys = []
         for probe, arm in batch:
             wording = "W0" if arm == "blank_W0" else arm
             question = format_prompt(config, wording, probe["target"])
             message = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": question}]}]
             prompts.append(processor.apply_chat_template(message, add_generation_prompt=True))
             rgb = image(probe["image"])
-            images.append([Image.new("RGB", rgb.size, (128, 128, 128)) if arm == "blank_W0" else rgb])
+            blank = arm == "blank_W0"
+            images.append([Image.new("RGB", rgb.size, (128, 128, 128)) if blank else rgb])
+            visual_keys.append(("gray", rgb.size) if blank else ("real", probe["image"]))
         inputs = processor(text=prompts, images=images, padding=True, return_tensors="pt")
         if inputs["pixel_values"].shape[1] != 1 or max(inputs["pixel_values"].shape[-2:]) > config["image_max_edge"]:
             raise ValueError("The processor must provide one image tile per example at the configured resolution")
         inputs = {key: (value.to(device=device, dtype=dtype) if value.is_floating_point() else value.to(device))
                   for key, value in inputs.items()}
         with torch.inference_mode():
+            if config["reuse_visual_features"]:
+                pixels = inputs.pop("pixel_values")
+                mask = inputs.pop("pixel_attention_mask", None)
+                keys = [(key, tuple(pixels.shape[-2:])) for key in visual_keys]
+                missing = {key: i for i, key in enumerate(keys) if key not in feature_cache}
+                if missing:
+                    idx = list(missing.values())
+                    embeddings = model.get_image_features(pixels[idx], mask[idx] if mask is not None else None)
+                    if embeddings.shape[0] != len(missing):
+                        raise ValueError("Unexpected number of image embeddings")
+                    feature_cache.update(zip(missing, embeddings, strict=True))
+                inputs["image_hidden_states"] = torch.stack([feature_cache[key] for key in keys])
             tokens = model.generate(**inputs, do_sample=False, num_beams=1,
                                     max_new_tokens=config["max_new_tokens"], use_cache=True)
         continuations = tokens[:, inputs["input_ids"].shape[1]:]
         return processor.batch_decode(continuations, skip_special_tokens=True)
 
     with log.open("a", encoding="utf-8", newline="\n") as stream:
-        for name, (model_id, revision) in config["models"].items():
+        for name in model_names:
+            model_id, revision = config["models"][name]
             pending = [(p, arm) for p, arm in work if (name, p["probe_id"], arm) not in existing]
             if not pending:
                 continue
@@ -117,16 +137,14 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
             processor.tokenizer.padding_side = "left"
             processor.image_processor.size = {"longest_edge": config["image_max_edge"]}
             processor.image_processor.do_image_splitting = config["image_splitting"]
-            model = AutoModelForImageTextToText.from_pretrained(
-                model_id, revision=revision, torch_dtype=dtype, attn_implementation="sdpa",
-                local_files_only=offline, token=False,
-            ).to(device).eval()
+            model = load_checkpoint(model_id, revision, dtype, offline).to(device).eval()
             print(f"{name}: {len(pending)} pending responses", flush=True)
+            feature_cache = {}
             started = time.perf_counter()
             for offset in range(0, len(pending), batch_size):
                 batch = pending[offset:offset + batch_size]
                 before = time.perf_counter()
-                answers = predict(batch, model, processor)
+                answers = predict(batch, model, processor, feature_cache)
                 elapsed = (time.perf_counter() - before) / len(batch)
                 for (probe, arm), raw in zip(batch, answers, strict=True):
                     row = dict(model=name, probe_id=probe["probe_id"], arm=arm, raw=raw,
@@ -136,6 +154,4 @@ def run(config, probes, metadata, out, device_name, batch_size, offline):
                 completed = offset + len(batch)
                 if completed == len(pending) or completed % (20 * batch_size) == 0:
                     print(f"{name}: {completed}/{len(pending)} in {time.perf_counter() - started:.1f}s", flush=True)
-            del model, processor
-            if device == "cuda":
-                torch.cuda.empty_cache()
+            del model, processor, feature_cache

@@ -10,6 +10,8 @@ The sampler joins [official POPE](https://github.com/RUCAIBox/POPE) and [RePOPE]
 
 All checkpoints receive a single image per probe with the longest edge capped at 512 pixels. Tiling is disabled and the runner checks the processor output size before generation.
 
+The runner isolates checkpoints in separate Python processes and reuses the frozen vision features for identical image inputs within each checkpoint. The Windows compatibility path reads the pinned [Safetensors format](https://github.com/huggingface/safetensors#format) in buffered chunks to avoid a failure in the memory-mapped checkpoint loader.
+
 | Name in tables | Open checkpoint |
 |---|---|
 | smol256 | [SmolVLM-256M-Instruct](https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct) |
@@ -33,6 +35,8 @@ python -m pip install --extra-index-url https://download.pytorch.org/whl/cu118 \
 ```
 
 Run fresh inference with `bash run_all.sh --out .cache/fresh-run`. The seed, two input manifests, model revisions, runtime hardware and software are printed during the run. The CSVs from the two runs can be compared directly for the same hardware and configuration. Numerical differences across devices or kernels may change some greedy decisions.
+
+For a remote GPU, open the [Colab notebook](https://colab.research.google.com/github/Jaivesh8/cv-project/blob/main/colab/P44_Audit.ipynb), select a GPU runtime, and run all cells. It installs into an isolated venv, logs the actual compute device, and downloads a small archive after validating all 6,000 prediction rows.
 
 For the offline viva, cache the separate pilot with `bash run_all.sh --pilot` while online. Demonstrate inference with networking disabled via `bash run_all.sh --pilot --offline --out .cache/viva` (use a fresh output directory for a fresh run).
 

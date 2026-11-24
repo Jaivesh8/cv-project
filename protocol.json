@@ -21,6 +21,7 @@
   "answer_instruction": "Answer with a single word: yes or no.",
   "image_max_edge": 512,
   "image_splitting": false,
+  "reuse_visual_features": true,
   "max_new_tokens": 4,
   "gallery_per_type": 4
 }

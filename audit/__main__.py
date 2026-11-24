@@ -14,12 +14,15 @@ def main():
     parser.add_argument("--out", type=Path)
     parser.add_argument("--device", choices=("auto", "cuda", "cpu"), default="auto")
     parser.add_argument("--batch-size", type=int, default=2)
+    parser.add_argument("--model", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.batch_size < 1:
         parser.error("--batch-size must be positive")
     out = args.out or Path(".cache/pilot" if args.pilot else "results")
     out.mkdir(parents=True, exist_ok=True)
     config = json.loads(PROTOCOL_PATH.read_text(encoding="utf-8"))
+    if args.model and args.model not in config["models"]:
+        parser.error(f"Unknown checkpoint: {args.model}")
     probes, hashes, manifest = make_probes(config, args.pilot)
     metadata = dict(
         seed=config["seed"], bootstrap_seed=config["bootstrap_seed"], pilot=args.pilot,
@@ -33,7 +36,9 @@ def main():
             raise ValueError("Recorded settings do not match the selected experimental protocol")
         print(json.dumps(recorded), flush=True)
     else:
-        run(config, probes, metadata, out, args.device, args.batch_size, args.offline)
+        run(config, probes, metadata, out, args.device, args.batch_size, args.offline, args.model)
+    if args.model:
+        return
     from .reporting import analyze
     analyze(config, probes, out)
 
