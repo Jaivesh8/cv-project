@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "$0")"
-if [[ -v PYTHON ]]; then
+if [[ -n "${PYTHON:-}" ]]; then
     python_cmd="$PYTHON"
 elif [[ -x .venv/bin/python ]]; then
     python_cmd=.venv/bin/python
